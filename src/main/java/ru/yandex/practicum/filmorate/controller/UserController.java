@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/users")
@@ -22,7 +23,7 @@ public class UserController {
     @GetMapping
     public Collection<User> findAll() {
         log.info("Received request to retrieve all users. Total users: {}.", users.size());
-        return users.values();
+        return new ArrayList<>(users.values());
     }
 
     @PostMapping

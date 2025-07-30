@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collection;
+import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.Month;
 
@@ -24,7 +25,7 @@ public class FilmController {
     @GetMapping
     public Collection<Film> findAll() {
         log.info("Received request to retrieve all films. Total films: {}.", films.size());
-        return films.values();
+        return new ArrayList<>(films.values());
     }
 
     @PostMapping

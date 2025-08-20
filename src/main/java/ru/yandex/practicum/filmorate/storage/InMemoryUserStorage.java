@@ -72,4 +72,8 @@ public class InMemoryUserStorage implements UserStorage {
                 .max()
                 .orElse(0) + 1;
     }
+
+    public boolean hasUser(Long userId) {
+        return users.containsKey(userId);
+    }
 }

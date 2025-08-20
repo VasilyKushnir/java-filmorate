@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.exception.InvalidArgumentException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collection;
-import java.util.ArrayList;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -16,14 +14,21 @@ public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
     public Collection<User> findAll() {
-        log.info("Received request to retrieve all users. Total users: {}.", users.size());
+        log.info("Received request to retrieve all users. Total users: {}", users.size());
         return new ArrayList<>(users.values());
+    }
+
+    public Optional<User> getUser(Long userId) {
+        if (userId <= 0) {
+            throw new InvalidArgumentException("User id must be positive number");
+        }
+        return Optional.ofNullable(users.get(userId));
     }
 
     public User create(User user) {
         if (user == null) {
-            log.warn("Received null user in POST /users request.");
-            throw new ValidationException("User must not be null.");
+            log.warn("Received null user in POST /users request");
+            throw new ValidationException("User must not be null");
         }
         user.setId(getNextId());
         fillNameIfBlank(user);
@@ -34,12 +39,12 @@ public class InMemoryUserStorage implements UserStorage {
 
     public User update(User user) {
         if (user.getId() == null) {
-            log.warn("Received user update request without ID.");
-            throw new ValidationException("User ID must not be null for update.");
+            log.warn("Received user update request without ID");
+            throw new ValidationException("User ID must not be null for update");
         }
         if (!users.containsKey(user.getId())) {
-            log.warn("Update failed: user with ID {} not found.", user.getId());
-            throw new ValidationException("User with ID " + user.getId() + " does not exist.");
+            log.warn("Update failed: user with ID {} not found", user.getId());
+            throw new ValidationException("User with ID " + user.getId() + " does not exist");
         }
         User currentUser = users.get(user.getId());
         currentUser.setEmail(user.getEmail());

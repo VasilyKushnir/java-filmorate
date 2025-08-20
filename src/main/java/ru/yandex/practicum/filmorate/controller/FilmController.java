@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -24,19 +23,22 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> findAll() {
-//        return filmStorage.findAll();
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "Work in progress");
+        return filmStorage.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable("id") Long filmId) {
+        return filmStorage.getFilm(filmId)
+                .orElseThrow(() -> new NotFoundException("Film with id = " + filmId + " was not found"));
     }
 
     @PostMapping
     public Film add(@RequestBody @Valid Film film) {
-//        return filmStorage.add(film);
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "Work in progress");
+        return filmStorage.add(film);
     }
 
     @PutMapping
     public Film update(@RequestBody @Valid Film film) {
-//        return filmStorage.update(film);
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "Work in progress");
+        return filmStorage.update(film);
     }
 }

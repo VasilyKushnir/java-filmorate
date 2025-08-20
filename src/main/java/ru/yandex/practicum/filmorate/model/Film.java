@@ -10,15 +10,15 @@ import java.time.LocalDate;
 public class Film {
     Long id;
 
-    @NotBlank(message = "Film name must not be null or blank.")
+    @NotBlank(message = "Film name must not be null or blank")
     String name;
 
-    @Size(max = 200, message = "Film description must not exceed 200 characters.")
+    @Size(max = 200, message = "Film description must not exceed 200 characters")
     String description;
 
-    @NotNull(message = "Release date is required.")
+    @NotNull(message = "Release date is required")
     LocalDate releaseDate;
 
-    @Positive(message = "Film duration must be greater than 0.")
+    @Positive(message = "Film duration must be greater than 0")
     int duration;
 }

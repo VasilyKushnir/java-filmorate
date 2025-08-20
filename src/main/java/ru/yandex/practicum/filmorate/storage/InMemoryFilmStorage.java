@@ -22,8 +22,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public Optional<Film> getFilm(Long filmId) {
         if (filmId <= 0) {
-            throw new InvalidArgumentException("Film id must be positive number");
+            log.warn("Received request to get film with invalid ID={}", filmId);
+            throw new InvalidArgumentException("Film ID must be positive number");
         }
+        log.info("Fetching film with ID={}", filmId);
         return Optional.ofNullable(films.get(filmId));
     }
 
@@ -45,8 +47,8 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new ValidationException("Film ID must not be null for update");
         }
         if (!films.containsKey(film.getId())) {
-            log.warn("Update failed: film with ID {} not found", film.getId());
-            throw new ValidationException("Film with ID " + film.getId() + " does not exist");
+            log.warn("Update failed: film with ID={} not found", film.getId());
+            throw new ValidationException("Film with ID=" + film.getId() + " does not exist");
         }
         validateFilm(film);
         Film currentFilm = films.get(film.getId());

@@ -20,8 +20,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     public Optional<User> getUser(Long userId) {
         if (userId <= 0) {
-            throw new InvalidArgumentException("User id must be positive number");
+            log.warn("Received request to get user with invalid ID={}", userId);
+            throw new InvalidArgumentException("User ID must be positive number");
         }
+        log.info("Fetching user with ID={}", userId);
         return Optional.ofNullable(users.get(userId));
     }
 
@@ -43,8 +45,8 @@ public class InMemoryUserStorage implements UserStorage {
             throw new ValidationException("User ID must not be null for update");
         }
         if (!users.containsKey(user.getId())) {
-            log.warn("Update failed: user with ID {} not found", user.getId());
-            throw new ValidationException("User with ID " + user.getId() + " does not exist");
+            log.warn("Update failed: user with ID={} not found", user.getId());
+            throw new ValidationException("User with ID=" + user.getId() + " does not exist");
         }
         User currentUser = users.get(user.getId());
         currentUser.setEmail(user.getEmail());

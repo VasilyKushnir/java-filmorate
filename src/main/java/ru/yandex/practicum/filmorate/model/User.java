@@ -5,6 +5,7 @@ import lombok.Data;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 public class User {
@@ -21,4 +22,6 @@ public class User {
 
     @PastOrPresent(message = "Birthday must be in the past or today")
     LocalDate birthday;
+
+    Set<Long> friendsIds;
 }

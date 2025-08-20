@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.exception.InvalidArgumentException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
@@ -21,7 +21,7 @@ public class InMemoryUserStorage implements UserStorage {
     public Optional<User> getUser(Long userId) {
         if (userId <= 0) {
             log.warn("Received request to get user with invalid ID={}", userId);
-            throw new InvalidArgumentException("User ID must be positive number");
+            throw new ValidationException("User ID must be positive number");
         }
         log.info("Fetching user with ID={}", userId);
         return Optional.ofNullable(users.get(userId));
@@ -34,6 +34,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
         user.setId(getNextId());
         fillNameIfBlank(user);
+        user.setFriendsIds(new HashSet<>());
         users.put(user.getId(), user);
         log.info("User created successfully: {}", user.toString());
         return user;
@@ -42,11 +43,11 @@ public class InMemoryUserStorage implements UserStorage {
     public User update(User user) {
         if (user.getId() == null) {
             log.warn("Received user update request without ID");
-            throw new ValidationException("User ID must not be null for update");
+            throw new NotFoundException("User ID must not be null for update");
         }
         if (!users.containsKey(user.getId())) {
             log.warn("Update failed: user with ID={} not found", user.getId());
-            throw new ValidationException("User with ID=" + user.getId() + " does not exist");
+            throw new NotFoundException("User with ID=" + user.getId() + " does not exist");
         }
         User currentUser = users.get(user.getId());
         currentUser.setEmail(user.getEmail());

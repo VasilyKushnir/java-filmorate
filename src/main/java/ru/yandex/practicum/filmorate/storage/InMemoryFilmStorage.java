@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.exception.InvalidArgumentException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
@@ -23,7 +23,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Optional<Film> getFilm(Long filmId) {
         if (filmId <= 0) {
             log.warn("Received request to get film with invalid ID={}", filmId);
-            throw new InvalidArgumentException("Film ID must be positive number");
+            throw new ValidationException("Film ID must be positive number");
         }
         log.info("Fetching film with ID={}", filmId);
         return Optional.ofNullable(films.get(filmId));
@@ -44,11 +44,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film update(Film film) {
         if (film.getId() == null) {
             log.warn("Received film update request without ID");
-            throw new ValidationException("Film ID must not be null for update");
+            throw new NotFoundException("Film ID must not be null for update");
         }
         if (!films.containsKey(film.getId())) {
             log.warn("Update failed: film with ID={} not found", film.getId());
-            throw new ValidationException("Film with ID=" + film.getId() + " does not exist");
+            throw new NotFoundException("Film with ID=" + film.getId() + " does not exist");
         }
         validateFilm(film);
         Film currentFilm = films.get(film.getId());

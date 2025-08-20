@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.yandex.practicum.filmorate.exception.InvalidArgumentException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -17,7 +17,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleInvalidArgumentException(final InvalidArgumentException e) {
+    public ErrorResponse handleValidationException(final ValidationException e) {
         return new ErrorResponse("Bad client request", e.getMessage());
     }
 }

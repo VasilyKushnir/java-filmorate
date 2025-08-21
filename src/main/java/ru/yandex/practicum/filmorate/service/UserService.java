@@ -1,23 +1,37 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class UserService {
-    UserStorage userStorage;
+    private final UserStorage userStorage;
 
-    @Autowired
-    public UserService(UserStorage userStorage) {
-         this.userStorage = userStorage;
+    public Collection<User> findAll() {
+        return userStorage.findAll();
+    }
+
+    public Optional<User> getUser(Long userId) {
+        return userStorage.getUser(userId);
+    }
+
+    public User create(User user) {
+        return userStorage.create(user);
+    }
+
+    public User update(User user) {
+        return userStorage.update(user);
     }
 
     public User addToFriends(Long user1Id, Long user2Id) {

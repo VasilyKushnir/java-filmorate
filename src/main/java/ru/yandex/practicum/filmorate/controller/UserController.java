@@ -1,49 +1,42 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
-    UserStorage userStorage;
-    UserService userService;
-
-    @Autowired
-    public UserController(UserStorage userStorage, UserService userService) {
-        this.userStorage = userStorage;
-        this.userService = userService;
-    }
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> findAll() {
-         return userStorage.findAll();
+         return userService.findAll();
     }
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable("id") Long userId) {
-        return userStorage.getUser(userId)
+        return userService.getUser(userId)
                 .orElseThrow(() -> new NotFoundException("User with id = " + userId + " was not found"));
     }
 
     @PostMapping
     public User create(@RequestBody @Valid User user) {
-        return userStorage.create(user);
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@RequestBody @Valid User user) {
-        return userStorage.update(user);
+        return userService.update(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")

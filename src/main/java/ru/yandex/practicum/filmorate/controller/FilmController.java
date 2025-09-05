@@ -1,77 +1,56 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import org.springframework.web.bind.annotation.*;
 
+import ru.yandex.practicum.filmorate.service.FilmService;
 import jakarta.validation.Valid;
 
-import lombok.extern.slf4j.Slf4j;
-
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Collection;
-import java.util.ArrayList;
-import java.time.LocalDate;
-import java.time.Month;
+import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/films")
-@Slf4j
 public class FilmController {
-    private final Map<Long, Film> films = new HashMap<>();
+    private final FilmService filmService;
 
     @GetMapping
     public Collection<Film> findAll() {
-        log.info("Received request to retrieve all films. Total films: {}.", films.size());
-        return new ArrayList<>(films.values());
+        return filmService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable("id") Long filmId) {
+        return filmService.getFilm(filmId)
+                .orElseThrow(() -> new NotFoundException("Film with id = " + filmId + " was not found"));
     }
 
     @PostMapping
     public Film add(@RequestBody @Valid Film film) {
-        if (film == null) {
-            log.warn("Received null film in POST /films request.");
-            throw new ValidationException("Film must not be null.");
-        }
-        validateFilm(film);
-        film.setId(getNextId());
-        films.put(film.getId(), film);
-        log.info("Film added successfully: {}", film.toString());
-        return film;
+        return filmService.add(film);
     }
 
     @PutMapping
     public Film update(@RequestBody @Valid Film film) {
-        if (film.getId() == null) {
-            log.warn("Received film update request without ID.");
-            throw new ValidationException("Film ID must not be null for update.");
-        }
-        if (!films.containsKey(film.getId())) {
-            log.warn("Update failed: film with ID {} not found.", film.getId());
-            throw new ValidationException("Film with ID " + film.getId() + " does not exist.");
-        }
-        validateFilm(film);
-        Film currentFilm = films.get(film.getId());
-        currentFilm.setName(film.getName());
-        currentFilm.setDescription(film.getDescription());
-        currentFilm.setReleaseDate(film.getReleaseDate());
-        currentFilm.setDuration(film.getDuration());
-        log.info("Film updated successfully: {}", currentFilm.toString());
-        return currentFilm;
+        return filmService.update(film);
     }
 
-    private void validateFilm(Film film) {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, Month.DECEMBER, 28))) {
-            throw new ValidationException("Release date cannot be earlier than December 28, 1895.");
-        }
+    @PutMapping("/{id}/like/{userId}")
+    public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
+        return filmService.addLike(id, userId);
     }
 
-    private long getNextId() {
-        return films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0) + 1;
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film removeLike(@PathVariable Long id, @PathVariable Long userId) {
+        return filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> fetchMostPopular(@RequestParam(defaultValue = "10") int count) {
+        return filmService.fetchMostPopular(count);
     }
 }

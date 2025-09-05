@@ -1,75 +1,61 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import org.springframework.web.bind.annotation.*;
 
+import ru.yandex.practicum.filmorate.service.UserService;
 import jakarta.validation.Valid;
 
-import lombok.extern.slf4j.Slf4j;
-
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Collection;
-import java.util.ArrayList;
+import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/users")
-@Slf4j
 public class UserController {
-    private final Map<Long, User> users = new HashMap<>();
+    private final UserService userService;
 
     @GetMapping
     public Collection<User> findAll() {
-        log.info("Received request to retrieve all users. Total users: {}.", users.size());
-        return new ArrayList<>(users.values());
+         return userService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable("id") Long userId) {
+        return userService.getUser(userId)
+                .orElseThrow(() -> new NotFoundException("User with id = " + userId + " was not found"));
     }
 
     @PostMapping
     public User create(@RequestBody @Valid User user) {
-        if (user == null) {
-            log.warn("Received null user in POST /users request.");
-            throw new ValidationException("User must not be null.");
-        }
-        user.setId(getNextId());
-        fillNameIfBlank(user);
-        users.put(user.getId(), user);
-        log.info("User created successfully: {}", user.toString());
-        return user;
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@RequestBody @Valid User user) {
-        if (user.getId() == null) {
-            log.warn("Received user update request without ID.");
-            throw new ValidationException("User ID must not be null for update.");
-        }
-        if (!users.containsKey(user.getId())) {
-            log.warn("Update failed: user with ID {} not found.", user.getId());
-            throw new ValidationException("User with ID " + user.getId() + " does not exist.");
-        }
-        User currentUser = users.get(user.getId());
-        currentUser.setEmail(user.getEmail());
-        currentUser.setLogin(user.getLogin());
-        fillNameIfBlank(user);
-        currentUser.setName(user.getName());
-        currentUser.setBirthday(user.getBirthday());
-        log.info("User updated successfully: {}", currentUser.toString());
-        return currentUser;
+        return userService.update(user);
     }
 
-    private void fillNameIfBlank(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
+    @PutMapping("/{id}/friends/{friendId}")
+    public User addToFriends(@PathVariable Long id, @PathVariable Long friendId) {
+        return userService.addToFriends(id, friendId);
     }
 
-    private long getNextId() {
-        return users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0) + 1;
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User removeFromFriends(@PathVariable Long id, @PathVariable Long friendId) {
+        return userService.removeFromFriends(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> fetchFriendsList(@PathVariable Long id) {
+        return userService.fetchFriendsList(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> fetchCommonFriendsList(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.fetchCommonFriendsList(id, otherId);
     }
 }

@@ -9,19 +9,23 @@ import java.util.Set;
 
 @Data
 public class Film {
-    Long id;
+    private Long id;
 
     @NotBlank(message = "Film name must not be null or blank")
-    String name;
+    private String name;
+
+    private Set<String> genre;
 
     @Size(max = 200, message = "Film description must not exceed 200 characters")
-    String description;
+    private String description;
 
     @NotNull(message = "Release date is required")
-    LocalDate releaseDate;
+    private LocalDate releaseDate;
 
     @Positive(message = "Film duration must be greater than 0")
-    int duration;
+    private int duration;
 
-    Set<Long> usersIdsLikes;
+    private String MPA;
+
+    private Set<Long> usersIdsLikes;
 }

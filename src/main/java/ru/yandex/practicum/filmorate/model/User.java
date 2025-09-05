@@ -9,19 +9,19 @@ import java.util.Set;
 
 @Data
 public class User {
-    Long id;
+    private Long id;
 
     @Email(message = "Invalid email format")
-    String email;
+    private String email;
 
     @NotBlank(message = "Login must not be blank")
     @Pattern(regexp = "^\\S+$", message = "Login must not contain spaces")
-    String login;
+    private String login;
 
-    String name;
+    private String name;
 
     @PastOrPresent(message = "Birthday must be in the past or today")
-    LocalDate birthday;
+    private LocalDate birthday;
 
-    Set<Long> friendsIds;
+    private Set<Long> friendsIds;
 }

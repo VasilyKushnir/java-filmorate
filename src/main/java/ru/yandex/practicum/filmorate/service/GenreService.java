@@ -18,7 +18,7 @@ import java.util.Set;
 public class GenreService {
     private final GenreStorage genreStorage;
 
-    public Collection<GenreDto> findAll() {
+    public Collection<GenreDto> getAll() {
         return genreStorage.findAll()
                 .stream()
                 .map(GenreMapper::mapToGenreDto)
@@ -26,16 +26,31 @@ public class GenreService {
     }
 
     public GenreDto getGenre(Integer genreId) {
-        return genreStorage.getGenre(genreId)
+        return genreStorage.findGenre(genreId)
                 .map(GenreMapper::mapToGenreDto)
                 .orElseThrow(() -> new NotFoundException("Genre with id = " + genreId + " was not found"));
     }
 
     public Set<Genre> getGenresForFilm(Long filmId) {
-        return genreStorage.getGenresForFilm(filmId);
+        return genreStorage.findGenresForFilm(filmId);
     }
 
     public boolean isGenreExist(Integer genreId) {
-        return genreStorage.getGenre(genreId).isPresent();
+        return genreStorage.findGenre(genreId).isPresent();
+    }
+
+    public boolean isGenresExist(Collection<Genre> genres) {
+        if (genres != null) {
+            Collection<Integer> genresIds = genreStorage.findAll()
+                    .stream()
+                    .map(Genre::getId)
+                    .toList();
+            for (Genre genre : genres) {
+                if (!genresIds.contains(genre.getId())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

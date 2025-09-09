@@ -1,15 +1,13 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
-
-import org.springframework.web.bind.annotation.*;
-
 import ru.yandex.practicum.filmorate.service.FilmService;
-import jakarta.validation.Valid;
 import ru.yandex.practicum.filmorate.service.LikesService;
 
 import java.util.Collection;
@@ -24,8 +22,8 @@ public class FilmController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<FilmDto> findAll() {
-        return filmService.findAll();
+    public Collection<FilmDto> getAll() {
+        return filmService.getAll();
     }
 
     @GetMapping("/{id}")
@@ -60,7 +58,7 @@ public class FilmController {
 
     @GetMapping("/popular")
     @ResponseStatus(HttpStatus.OK)
-    public List<FilmDto> fetchMostPopular(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.fetchMostPopular(count);
+    public List<FilmDto> getMostPopular(@RequestParam(defaultValue = "10") Integer count) {
+        return filmService.getMostPopular(count);
     }
 }

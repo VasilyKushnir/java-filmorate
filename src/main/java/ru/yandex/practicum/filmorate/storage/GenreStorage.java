@@ -9,7 +9,7 @@ import java.util.Set;
 public interface GenreStorage {
     Collection<Genre> findAll();
 
-    Optional<Genre> getGenre(Integer id);
+    Optional<Genre> findGenre(Integer id);
 
-    Set<Genre> getGenresForFilm(Long filmId);
+    Set<Genre> findGenresForFilm(Long filmId);
 }

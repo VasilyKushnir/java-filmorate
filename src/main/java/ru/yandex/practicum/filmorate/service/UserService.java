@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
-import ru.yandex.practicum.filmorate.mapper.UserMapper;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 public class UserService {
     private final UserStorage userStorage;
 
-    public Collection<UserDto> findAll() {
+    public Collection<UserDto> getAll() {
         return userStorage.findAll()
                 .stream()
                 .map(UserMapper::mapToUserDto)
@@ -28,7 +28,7 @@ public class UserService {
     }
 
     public UserDto getUser(Long userId) {
-        return userStorage.getUser(userId)
+        return userStorage.findUser(userId)
                 .map(UserMapper::mapToUserDto)
                 .orElseThrow(() -> new NotFoundException("User with id = " + userId + " was not found"));
     }
@@ -40,7 +40,7 @@ public class UserService {
     }
 
     public UserDto update(UpdateUserRequest request) {
-        User updatedUser = userStorage.getUser(request.getId())
+        User updatedUser = userStorage.findUser(request.getId())
                 .map(user -> UserMapper.updateUserFields(user, request))
                 .orElseThrow(() -> new NotFoundException("User was not found"));
         updatedUser = userStorage.update(updatedUser);
@@ -48,25 +48,25 @@ public class UserService {
     }
 
     public boolean isUserExist(Long userId) {
-        return userStorage.getUser(userId).isPresent();
+        return userStorage.findUser(userId).isPresent();
     }
 
-    public List<UserDto> fetchFriendsList(Long userId) {
+    public List<UserDto> getFriendsList(Long userId) {
         if (!isUserExist(userId)) {
             throw new NotFoundException("User with ID=" + userId + " was not found");
         }
-        return userStorage.fetchFriendsList(userId)
+        return userStorage.findFriendsList(userId)
                 .stream()
                 .map(UserMapper::mapToUserDto)
                 .toList();
     }
 
-    public List<UserDto> fetchCommonFriendsList(Long user1Id, Long user2Id) {
-        User user1 = userStorage.getUser(user1Id).orElseThrow(() ->
+    public List<UserDto> getCommonFriendsList(Long user1Id, Long user2Id) {
+        User user1 = userStorage.findUser(user1Id).orElseThrow(() ->
                 new NotFoundException("User1 with ID=" + user1Id + " was not found"));
-        User user2 = userStorage.getUser(user2Id).orElseThrow(() ->
+        User user2 = userStorage.findUser(user2Id).orElseThrow(() ->
                 new NotFoundException("User2 with ID=" + user2Id + " was not found"));
-        return userStorage.fetchCommonFriendsList(user1Id, user2Id)
+        return userStorage.findCommonFriendsList(user1Id, user2Id)
                 .stream()
                 .map(UserMapper::mapToUserDto)
                 .toList();

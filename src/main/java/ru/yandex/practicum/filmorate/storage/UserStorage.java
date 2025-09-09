@@ -9,13 +9,13 @@ import java.util.Optional;
 public interface UserStorage {
     Collection<User> findAll();
 
-    Optional<User> getUser(Long userId);
+    Optional<User> findUser(Long userId);
 
     User create(User user);
 
     User update(User user);
 
-    List<User> fetchFriendsList(Long userId);
+    List<User> findFriendsList(Long userId);
 
-    List<User> fetchCommonFriendsList(Long offeringPersonId, Long recipientPersonId);
+    List<User> findCommonFriendsList(Long offeringPersonId, Long recipientPersonId);
 }

@@ -16,8 +16,8 @@ public class MpaController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<MpaDto> findAll() {
-        return mpaService.findAll();
+    public Collection<MpaDto> getAll() {
+        return mpaService.getAll();
     }
 
     @GetMapping("/{id}")

@@ -13,29 +13,55 @@ import java.util.Optional;
 @Primary
 @Repository
 public class UserRepository extends BaseRepository<User> implements UserStorage {
-    private static final String FIND_ALL_QUERY = "SELECT * FROM users";
-    private static final String FIND_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
-    private static final String INSERT_QUERY = "INSERT INTO users(email, login, name, birthday)" +
-            "VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_QUERY = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ?" +
-            "WHERE id = ?";
+    private static final String FIND_ALL_QUERY = """
+            SELECT *
+            FROM users
+            """;
+
+    private static final String FIND_BY_ID_QUERY = """
+            SELECT *
+            FROM users
+            WHERE id = ?
+            """;
+
+    private static final String INSERT_QUERY = """
+            INSERT INTO users (
+                email,
+                login,
+                name,
+                birthday
+            )
+            VALUES (?, ?, ?, ?)
+            """;
+
+    private static final String UPDATE_QUERY = """
+            UPDATE users
+            SET email = ?,
+                login = ?,
+                name = ?,
+                birthday = ?
+            WHERE id = ?
+            """;
 
     private static final String FIND_USER_FRIENDS_QUERY = """
             SELECT u.*
             FROM friends AS f
-            JOIN users AS u ON u.id = f.recipient_person_id
+            JOIN users AS u
+              ON u.id = f.recipient_person_id
             WHERE f.offering_person_id = ?
             """;
 
     private static final String FIND_COMMON_FRIENDS_QUERY = """
             (SELECT u.*
             FROM friends AS f
-            JOIN users AS u ON u.id = f.recipient_person_id
+            JOIN users AS u
+              ON u.id = f.recipient_person_id
             WHERE f.offering_person_id = ?)
             INTERSECT
             (SELECT u.*
             FROM friends AS f
-            JOIN users AS u ON u.id = f.recipient_person_id
+            JOIN users AS u
+              ON u.id = f.recipient_person_id
             WHERE f.offering_person_id = ?)
             """;
 
@@ -47,7 +73,7 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
         return findMany(FIND_ALL_QUERY);
     }
 
-    public Optional<User> getUser(Long userId) {
+    public Optional<User> findUser(Long userId) {
         return findOne(FIND_BY_ID_QUERY, userId);
     }
 
@@ -75,11 +101,11 @@ public class UserRepository extends BaseRepository<User> implements UserStorage 
         return user;
     }
 
-    public List<User> fetchFriendsList(Long userId) {
+    public List<User> findFriendsList(Long userId) {
         return findMany(FIND_USER_FRIENDS_QUERY, userId);
     }
 
-    public List<User> fetchCommonFriendsList(Long offeringPersonId, Long recipientPersonId) {
+    public List<User> findCommonFriendsList(Long offeringPersonId, Long recipientPersonId) {
         return findMany(FIND_COMMON_FRIENDS_QUERY, offeringPersonId, recipientPersonId);
     }
 }

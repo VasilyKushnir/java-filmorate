@@ -1,10 +1,9 @@
-package ru.yandex.practicum.filmorate.controller;
+package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.FriendsStorage;
 
 @Service
@@ -14,7 +13,7 @@ public class FriendsService {
     private final FriendsStorage friendsStorage;
     private final UserService userService;
 
-    public void addFriend(Long offeringPersonId, Long recipientPersonId) {
+    public void getFriend(Long offeringPersonId, Long recipientPersonId) {
         if (userService.isUserExist(offeringPersonId) && userService.isUserExist(recipientPersonId)) {
             friendsStorage.addFriend(offeringPersonId, recipientPersonId);
         } else {

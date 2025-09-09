@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.LocalDate;
@@ -26,7 +25,7 @@ public class FilmService {
     private final MpaService mpaService;
     private final GenreService genreService;
 
-    public Collection<FilmDto> findAll() {
+    public Collection<FilmDto> getAll() {
         return filmStorage.findAll()
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
@@ -34,7 +33,7 @@ public class FilmService {
     }
 
     public FilmDto getFilm(Long filmId) {
-        return filmStorage.getFilm(filmId)
+        return filmStorage.findFilm(filmId)
                 .map(FilmMapper::mapToFilmDto)
                 .orElseThrow(() -> new NotFoundException("Film with id = " + filmId + " was not found"));
     }
@@ -53,17 +52,13 @@ public class FilmService {
         if (film.getMpa() != null && !mpaService.isMpaExists(film.getMpa().getId())) {
             throw new NotFoundException("Film MPA with id = " + film.getMpa().getId() + " is not exist");
         }
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                if (!genreService.isGenreExist(genre.getId())) {
-                    throw new NotFoundException("Film genre with id = " + genre.getId() + " is not exist");
-                }
-            }
+        if (film.getGenres() != null && !genreService.isGenresExist(film.getGenres())) {
+            throw new NotFoundException("Genre not exist");
         }
     }
 
     public FilmDto update(UpdateFilmRequest request) {
-        Film updatedFilm = filmStorage.getFilm(request.getId())
+        Film updatedFilm = filmStorage.findFilm(request.getId())
                 .map(film -> FilmMapper.updateFilmFields(film, request))
                 .orElseThrow(() -> new NotFoundException("Film was not found"));
         updatedFilm = filmStorage.update(updatedFilm);
@@ -71,14 +66,14 @@ public class FilmService {
     }
 
     public boolean isFilmExist(Long filmId) {
-        return filmStorage.getFilm(filmId).isPresent();
+        return filmStorage.findFilm(filmId).isPresent();
     }
 
-    public List<FilmDto> fetchMostPopular(Integer count) {
+    public List<FilmDto> getMostPopular(Integer count) {
         if (count <= 0) {
             throw new ValidationException("Films count must be bigger than zero");
         }
-        return filmStorage.fetchMostPopular(count)
+        return filmStorage.findMostPopular(count)
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
                 .toList();

@@ -37,7 +37,7 @@ class FilmorateApplicationTests {
     @Test
     public void testFindUserById() {
 
-        Optional<User> userOptional = userStorage.getUser(1L);
+        Optional<User> userOptional = userStorage.findUser(1L);
 
         assertThat(userOptional)
                 .isPresent()

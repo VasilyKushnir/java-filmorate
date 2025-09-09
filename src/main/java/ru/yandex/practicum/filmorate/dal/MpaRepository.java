@@ -13,8 +13,16 @@ import java.util.Optional;
 @Primary
 @Repository
 public class MpaRepository extends BaseRepository<Mpa> implements MpaStorage {
-    private static final String FIND_ALL_QUERY = "SELECT * FROM mpa";
-    private static final String FIND_BY_ID_QUERY = "SELECT * FROM mpa WHERE id = ?";
+    private static final String FIND_ALL_QUERY = """
+            SELECT *
+            FROM mpa
+            """;
+
+    private static final String FIND_BY_ID_QUERY = """
+            SELECT *
+            FROM mpa
+            WHERE id = ?
+            """;
 
     public MpaRepository(JdbcTemplate jdbc, RowMapper<Mpa> mapper) {
         super(jdbc, mapper);
@@ -24,7 +32,7 @@ public class MpaRepository extends BaseRepository<Mpa> implements MpaStorage {
         return findMany(FIND_ALL_QUERY);
     }
 
-    public Optional<Mpa> getMpa(Integer mpaId) {
+    public Optional<Mpa> findMpa(Integer mpaId) {
         return findOne(FIND_BY_ID_QUERY, mpaId);
     }
 }

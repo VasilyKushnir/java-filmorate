@@ -9,11 +9,11 @@ import java.util.Optional;
 public interface FilmStorage {
     Collection<Film> findAll();
 
-    Optional<Film> getFilm(Long filmId);
+    Optional<Film> findFilm(Long filmId);
 
     Film add(Film film);
 
     Film update(Film film);
 
-    List<Film> fetchMostPopular(Integer count);
+    List<Film> findMostPopular(Integer count);
 }

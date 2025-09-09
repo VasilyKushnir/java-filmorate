@@ -12,13 +12,19 @@ import ru.yandex.practicum.filmorate.storage.LikesStorage;
 public class LikesRepository implements LikesStorage {
     private final JdbcTemplate jdbc;
 
-    private static final String ADD_LIKE_QUERY =
-            "INSERT INTO users_ids_likes (user_id, film_id) " +
-                    "VALUES (?, ?)";
+    private static final String ADD_LIKE_QUERY = """
+            INSERT INTO users_ids_likes (
+                user_id,
+                film_id
+            )
+            VALUES (?, ?)
+            """;
 
-    private static final String REMOVE_LIKE_QUERY =
-            "DELETE FROM users_ids_likes " +
-                    "WHERE user_id = ? AND film_id = ?";
+    private static final String REMOVE_LIKE_QUERY = """
+            DELETE FROM users_ids_likes
+            WHERE user_id = ?
+              AND film_id = ?
+            """;
 
     public void addLike(Long userId, Long filmId) {
         jdbc.update(ADD_LIKE_QUERY, userId, filmId);

@@ -16,7 +16,7 @@ import java.util.Collection;
 public class MpaService {
     private final MpaStorage mpaStorage;
 
-    public Collection<MpaDto> findAll() {
+    public Collection<MpaDto> getAll() {
         return mpaStorage.findAll()
                 .stream()
                 .map(MpaMapper::mapToMpaDto)
@@ -24,12 +24,12 @@ public class MpaService {
     }
 
     public MpaDto getMpa(Integer mpaId) {
-        return mpaStorage.getMpa(mpaId)
+        return mpaStorage.findMpa(mpaId)
                 .map(MpaMapper::mapToMpaDto)
                 .orElseThrow(() -> new NotFoundException("Genre with id = " + mpaId + " was not found"));
     }
 
     public boolean isMpaExists(Integer mpaId) {
-        return mpaStorage.getMpa(mpaId).isPresent();
+        return mpaStorage.findMpa(mpaId).isPresent();
     }
 }

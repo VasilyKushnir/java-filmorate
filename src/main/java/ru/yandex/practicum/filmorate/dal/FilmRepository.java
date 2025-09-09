@@ -16,42 +16,65 @@ import java.util.Optional;
 @Primary
 @Repository
 public class FilmRepository extends BaseRepository<Film> implements FilmStorage {
-    private static final String FIND_ALL_QUERY =
-            "SELECT f.*, m.name AS mpa_name " +
-                    "FROM films AS f " +
-                    "JOIN mpa AS m ON f.mpa_id = m.id";
+    private static final String FIND_ALL_QUERY = """
+            SELECT f.*, m.name AS mpa_name
+            FROM films AS f
+            JOIN mpa AS m
+              ON f.mpa_id = m.id
+            """;
 
-    private static final String FIND_BY_ID_QUERY =
-            "SELECT f.*, m.name AS mpa_name " +
-                    "FROM films AS f " +
-                    "JOIN mpa AS m ON f.mpa_id = m.id " +
-                    "WHERE f.id = ?";
+    private static final String FIND_BY_ID_QUERY = """
+            SELECT f.*, m.name AS mpa_name
+            FROM films AS f
+            JOIN mpa AS m
+              ON f.mpa_id = m.id
+            WHERE f.id = ?
+            """;
 
-    private static final String INSERT_QUERY =
-            "INSERT INTO films (name, description, release_date, duration, mpa_id)" +
-                    "VALUES (?, ?, ?, ?, ?)";
+    private static final String INSERT_QUERY = """
+            INSERT INTO films (
+                name,
+                description,
+                release_date,
+                duration,
+                mpa_id
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """;
 
-    private static final String INSERT_FILM_GENRE_QUERY =
-            "INSERT INTO films_genres (film_id, genre_id) " +
-                    "VALUES (?, ?)";
+    private static final String INSERT_FILM_GENRE_QUERY = """
+            INSERT INTO films_genres (
+                film_id,
+                genre_id
+            )
+            VALUES (?, ?)
+            """;
 
-    private static final String DELETE_FILM_GENRES_QUERY =
-            "DELETE FROM films_genres " +
-                    "WHERE film_id = ?";
+    private static final String DELETE_FILM_GENRES_QUERY = """
+            DELETE FROM films_genres
+            WHERE film_id = ?
+            """;
 
-    private static final String UPDATE_QUERY =
-            "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? " +
-                    "WHERE id = ?";
+    private static final String UPDATE_QUERY = """
+            UPDATE films
+            SET name = ?,
+                description = ?,
+                release_date = ?,
+                duration = ?,
+                mpa_id = ?
+            WHERE id = ?
+            """;
 
-    private static final String FIND_MOST_POPULAR_QUERY =
-            "SELECT COUNT(uil.film_id) AS count, f.*, m.name AS mpa_name " +
-                    "FROM users_ids_likes AS uil " +
-                    "JOIN films AS f ON uil.film_id = f.id " +
-                    "JOIN mpa AS m ON f.mpa_id = m.id " +
-                    "GROUP BY film_id " +
-                    "ORDER BY count DESC " +
-                    "LIMIT ?";
-
+    private static final String FIND_MOST_POPULAR_QUERY = """
+            SELECT COUNT(uil.film_id) AS count, f.*, m.name AS mpa_name
+            FROM users_ids_likes AS uil
+            JOIN films AS f ON uil.film_id = f.id
+            JOIN mpa AS m
+              ON f.mpa_id = m.id
+            GROUP BY film_id
+            ORDER BY count DESC
+            LIMIT ?
+            """;
 
     public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
@@ -61,7 +84,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
         return findMany(FIND_ALL_QUERY);
     }
 
-    public Optional<Film> getFilm(Long filmId) {
+    public Optional<Film> findFilm(Long filmId) {
         return findOne(FIND_BY_ID_QUERY, filmId);
     }
 
@@ -120,7 +143,7 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
         return film;
     }
 
-    public List<Film> fetchMostPopular(Integer count) {
+    public List<Film> findMostPopular(Integer count) {
         return findMany(FIND_MOST_POPULAR_QUERY, count);
     }
 }

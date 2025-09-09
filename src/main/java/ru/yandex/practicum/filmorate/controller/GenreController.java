@@ -16,8 +16,8 @@ public class GenreController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Collection<GenreDto> findAll() {
-        return genreService.findAll();
+    public Collection<GenreDto> getAll() {
+        return genreService.getAll();
     }
 
     @GetMapping("/{id}")

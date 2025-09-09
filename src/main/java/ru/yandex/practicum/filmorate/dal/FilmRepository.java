@@ -180,10 +180,9 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     }
 
     private void setGenres(List<Film> films, List<FilmGenre> genres) {
-        films.forEach(film -> {
-            genres.stream()
-                    .filter(g -> Objects.equals(g.getFilmId(), film.getId()))
-                    .forEach(g -> film.getGenres().add(g.getGenre()));
-        });
+        films.forEach(film -> genres.stream()
+                .filter(g -> Objects.equals(g.getFilmId(), film.getId()))
+                .forEach(g -> film.getGenres().add(g.getGenre()))
+        );
     }
 }

@@ -1,13 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.RequiredArgsConstructor;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-
-import org.springframework.web.bind.annotation.*;
-
-import ru.yandex.practicum.filmorate.service.FilmService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.LikesService;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,40 +18,47 @@ import java.util.List;
 @RequestMapping("/films")
 public class FilmController {
     private final FilmService filmService;
+    private final LikesService likesService;
 
     @GetMapping
-    public Collection<Film> findAll() {
-        return filmService.findAll();
+    @ResponseStatus(HttpStatus.OK)
+    public Collection<FilmDto> getAll() {
+        return filmService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Film getFilm(@PathVariable("id") Long filmId) {
-        return filmService.getFilm(filmId)
-                .orElseThrow(() -> new NotFoundException("Film with id = " + filmId + " was not found"));
+    @ResponseStatus(HttpStatus.OK)
+    public FilmDto getFilm(@PathVariable("id") Long filmId) {
+        return filmService.getFilm(filmId);
     }
 
     @PostMapping
-    public Film add(@RequestBody @Valid Film film) {
-        return filmService.add(film);
+    @ResponseStatus(HttpStatus.CREATED)
+    public FilmDto add(@RequestBody @Valid NewFilmRequest filmRequest) {
+        return filmService.add(filmRequest);
     }
 
     @PutMapping
-    public Film update(@RequestBody @Valid Film film) {
-        return filmService.update(film);
+    @ResponseStatus(HttpStatus.OK)
+    public FilmDto update(@RequestBody @Valid UpdateFilmRequest request) {
+        return filmService.update(request);
     }
 
-    @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
-        return filmService.addLike(id, userId);
+    @PutMapping("/{filmId}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void addLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        likesService.addLike(filmId, userId);
     }
 
-    @DeleteMapping("/{id}/like/{userId}")
-    public Film removeLike(@PathVariable Long id, @PathVariable Long userId) {
-        return filmService.removeLike(id, userId);
+    @DeleteMapping("/{filmId}/like/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void removeLike(@PathVariable Long filmId, @PathVariable Long userId) {
+        likesService.removeLike(filmId, userId);
     }
 
     @GetMapping("/popular")
-    public List<Film> fetchMostPopular(@RequestParam(defaultValue = "10") int count) {
-        return filmService.fetchMostPopular(count);
+    @ResponseStatus(HttpStatus.OK)
+    public List<FilmDto> getMostPopular(@RequestParam(defaultValue = "10") Integer count) {
+        return filmService.getMostPopular(count);
     }
 }

@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.service.GenreService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.HashSet;
 
 @Component
 @RequiredArgsConstructor
@@ -22,13 +23,10 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setId(resultSet.getLong("id"));
         film.setName(resultSet.getString("name"));
         film.setDescription(resultSet.getString("description"));
-
         LocalDate releaseDate = resultSet.getDate("release_date").toLocalDate();
         film.setReleaseDate(releaseDate);
-
         film.setDuration(resultSet.getInt("duration"));
-
-        film.setGenres(genreService.getGenresForFilm(film.getId()));
+        film.setGenres(new HashSet<>());
 
         Mpa mpa = new Mpa();
         mpa.setId(resultSet.getInt("mpa_id"));

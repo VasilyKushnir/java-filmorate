@@ -5,12 +5,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmGenre;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Primary
@@ -76,16 +78,35 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
             LIMIT ?
             """;
 
-    public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper) {
+    private static final String FIND_FILMS_GENRES_TEMPLATE = """
+            SELECT g.id, g.name, fg.film_id
+            FROM films_genres AS fg
+            JOIN genres AS g ON g.id = fg.genre_id
+            WHERE fg.film_id IN (SELECT f.id FROM (%s) f)
+            """;
+
+    JdbcTemplate jdbc;
+    RowMapper<Genre> genreMapper;
+
+    public FilmRepository(JdbcTemplate jdbc, RowMapper<Film> mapper, RowMapper<Genre> genreMapper) {
         super(jdbc, mapper);
+        this.jdbc = jdbc;
+        this.genreMapper = genreMapper;
     }
 
     public List<Film> findAll() {
-        return findMany(FIND_ALL_QUERY);
+        List<Film> films = findMany(FIND_ALL_QUERY);
+        this.setGenres(films, this.findFilmGenres(FIND_ALL_QUERY));
+
+        return films;
     }
 
     public Optional<Film> findFilm(Long filmId) {
-        return findOne(FIND_BY_ID_QUERY, filmId);
+        Optional<Film> film = findOne(FIND_BY_ID_QUERY, filmId);
+        film.ifPresent(value ->
+                this.setGenres(List.of(value), this.findFilmGenres(FIND_BY_ID_QUERY, filmId)));
+
+        return film;
     }
 
     public Film add(Film film) {
@@ -144,6 +165,25 @@ public class FilmRepository extends BaseRepository<Film> implements FilmStorage 
     }
 
     public List<Film> findMostPopular(Integer count) {
-        return findMany(FIND_MOST_POPULAR_QUERY, count);
+        List<Film> films = findMany(FIND_MOST_POPULAR_QUERY, count);
+        this.setGenres(films, this.findFilmGenres(FIND_MOST_POPULAR_QUERY, count));
+
+        return films;
+    }
+
+    private List<FilmGenre> findFilmGenres(String query, Object... params) {
+        RowMapper<FilmGenre> mapper = (rs, rowNum) -> new FilmGenre(
+                rs.getLong("film_id"),
+                this.genreMapper.mapRow(rs, rowNum));
+
+        return jdbc.query(FIND_FILMS_GENRES_TEMPLATE.formatted(query), mapper, params);
+    }
+
+    private void setGenres(List<Film> films, List<FilmGenre> genres) {
+        films.forEach(film -> {
+            genres.stream()
+                    .filter(g -> Objects.equals(g.getFilmId(), film.getId()))
+                    .forEach(g -> film.getGenres().add(g.getGenre()));
+        });
     }
 }

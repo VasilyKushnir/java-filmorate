@@ -3,74 +3,79 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final MpaService mpaService;
+    private final GenreService genreService;
 
-    public Collection<Film> findAll() {
-        return filmStorage.findAll();
+    public Collection<FilmDto> getAll() {
+        return filmStorage.findAll()
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
     }
 
-    public Optional<Film> getFilm(Long filmId) {
-        return filmStorage.getFilm(filmId);
+    public FilmDto getFilm(Long filmId) {
+        return filmStorage.findFilm(filmId)
+                .map(FilmMapper::mapToFilmDto)
+                .orElseThrow(() -> new NotFoundException("Film with id = " + filmId + " was not found"));
     }
 
-    public Film add(Film film) {
-        return filmStorage.add(film);
+    public FilmDto add(NewFilmRequest request) {
+        Film film = FilmMapper.mapToFilm(request);
+        validateFilm(film);
+        film = filmStorage.add(film);
+        return FilmMapper.mapToFilmDto(film);
     }
 
-    public Film update(Film film) {
-        return filmStorage.update(film);
-    }
-
-    public Film addLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilm(filmId).orElseThrow(() ->
-                new NotFoundException("Film with ID=" + filmId + " was not found"));
-        if (userStorage.hasUser(userId)) {
-            film.getUsersIdsLikes().add(userId);
-            filmStorage.update(film);
-            log.info("Film with ID={} was liked by user with ID={}", filmId, userId);
-            return film;
-        } else {
-            throw new NotFoundException("User with ID=" + userId + " was not found");
+    private void validateFilm(Film film) {
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, Month.DECEMBER, 28))) {
+            throw new ValidationException("Release date cannot be earlier than December 28, 1895");
+        }
+        if (film.getMpa() != null && !mpaService.isMpaExists(film.getMpa().getId())) {
+            throw new NotFoundException("Film MPA with id = " + film.getMpa().getId() + " is not exist");
+        }
+        if (film.getGenres() != null && !genreService.isGenresExist(film.getGenres())) {
+            throw new NotFoundException("Genre not exist");
         }
     }
 
-    public Film removeLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilm(filmId).orElseThrow(() ->
-                new NotFoundException("Film with ID=" + filmId + " was not found"));
-        if (userStorage.hasUser(userId)) {
-            film.getUsersIdsLikes().remove(userId);
-            filmStorage.update(film);
-            log.info("Film with ID={} was no longer liked by user with ID={}", filmId, userId);
-            return film;
-        } else {
-            throw new NotFoundException("User with ID=" + userId + " was not found");
-        }
+    public FilmDto update(UpdateFilmRequest request) {
+        Film updatedFilm = filmStorage.findFilm(request.getId())
+                .map(film -> FilmMapper.updateFilmFields(film, request))
+                .orElseThrow(() -> new NotFoundException("Film was not found"));
+        updatedFilm = filmStorage.update(updatedFilm);
+        return FilmMapper.mapToFilmDto(updatedFilm);
     }
 
-    public List<Film> fetchMostPopular(int count) {
+    public boolean isFilmExist(Long filmId) {
+        return filmStorage.findFilm(filmId).isPresent();
+    }
+
+    public List<FilmDto> getMostPopular(Integer count) {
         if (count <= 0) {
             throw new ValidationException("Films count must be bigger than zero");
         }
-
-        log.info("List of top ten films has returned");
-        return filmStorage.findAll().stream()
-                .sorted((f1, f2) -> f1.getUsersIdsLikes().size() - f2.getUsersIdsLikes().size())
-                .limit(count)
-                .toList().reversed();
+        return filmStorage.findMostPopular(count)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
     }
 }
